@@ -5,7 +5,7 @@ from apps.catalog.views import ProductDetail, ProductSearch
 
 
 def health(_):
-return JsonResponse({"ok": True})
+    return JsonResponse({"ok": True})
 
 
 urlpatterns = [
