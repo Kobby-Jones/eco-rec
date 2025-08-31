@@ -29,7 +29,6 @@ INTERACTIONS = [
 {"user_id":2,"product_id":102,"type":"purchase","value":5599},
 ]
 
-
 class Command(BaseCommand):
     help = "Load sample users/products/interactions"
 

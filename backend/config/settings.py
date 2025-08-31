@@ -16,9 +16,12 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates","DIRS": [],"APP_DIRS": True,"OPTIONS": {"context_processors": ["django.template.context_processors.debug","django.template.context_processors.request","django.contrib.auth.context_processors.auth","django.contrib.messages.context_processors.messages",],},},]
 WSGI_APPLICATION = None
 ASGI_APPLICATION = "config.asgi:application"
-DATABASES = {"default": {"ENGINE": "django.db.backends.postgresql","NAME": os.getenv("POSTGRES_DB","app"),"USER": os.getenv("POSTGRES_USER","app"),"PASSWORD": os.getenv("POSTGRES_PASSWORD","app"),"HOST": os.getenv("DB_HOST","db"),"PORT": os.getenv("DB_PORT","5432"),}}
+DATABASES = {"default": {"ENGINE": "django.db.backends.postgresql","NAME": os.getenv("POSTGRES_DB","app"),"USER": os.getenv("POSTGRES_USER","app"),"PASSWORD": os.getenv("POSTGRES_PASSWORD","app"),"HOST": os.getenv("DB_HOST","localhost"),"PORT": os.getenv("DB_PORT","5432"),}}
 STATIC_URL = "/static/"
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS","http://localhost:5173").split(",")
 REDIS_URL = os.getenv("REDIS_URL","redis://redis:6379/0")
 MODEL_DIR = os.getenv("MODEL_DIR", str(BASE_DIR/".."/"models"))
 REST_FRAMEWORK = {"DEFAULT_RENDERER_CLASSES":["rest_framework.renderers.JSONRenderer"]}
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+CORS_ALLOW_CREDENTIALS = True
+

@@ -6,7 +6,7 @@ from .model_gnn import HeteroLP
 
 EMB_DIM = 64
 BATCH = 4096
-EPOCHS = 3
+EPOCHS = 10
 MODEL_PATH = "/models/gnn_model.pt"
 
 def fetch_edges():
@@ -25,12 +25,14 @@ def fetch_products():
     return pd.DataFrame(rows, columns=["product_id","category_id","brand"])
 
 def build_graph():
-    inter = fetch_edges(); prods = fetch_products()
-    u_ids = {u:i for i,u in enumerate(inter["user_id"].unique())}
-    p_ids = {p:i for i,p in enumerate(prods["product_id"].unique())}
-    c_ids = {c:i for i,c in enumerate(prods["category_id"].dropna().unique())}
-    b_ids = {b:i for i,b in enumerate(prods["brand"].unique())}
+    inter = fetch_edges()
+    prods = fetch_products()
 
+    # Force Python ints in the ID maps
+    u_ids = {int(u): i for i, u in enumerate(inter["user_id"].unique())}
+    p_ids = {int(p): i for i, p in enumerate(prods["product_id"].unique())}
+    c_ids = {int(c): i for i, c in enumerate(prods["category_id"].dropna().unique())}
+    b_ids = {str(b): i for i, b in enumerate(prods["brand"].astype(str).unique())}
 
     data = HeteroData()
     data["user"].num_nodes = len(u_ids)
@@ -38,35 +40,41 @@ def build_graph():
     data["category"].num_nodes = len(c_ids)
     data["brand"].num_nodes = len(b_ids)
 
-
-    for n in ["user","product","category","brand"]:
+    # Init embeddings
+    for n in ["user", "product", "category", "brand"]:
         data[n].x = torch.nn.Embedding(getattr(data[n], "num_nodes"), EMB_DIM).weight
 
+    # --- User -> Product edges (and reverse)
+    for t in ["view", "click", "add_to_cart", "purchase", "rating"]:
+        e = inter[inter["type"] == t]
+        if len(e) == 0:
+            continue
 
-    for t in ["view","click","add_to_cart","purchase","rating"]:
-        e = inter[inter["type"]==t]
-        if len(e)==0: continue
-        src = torch.tensor([u_ids[u] for u in e["user_id"].values], dtype=torch.long)
-        dst = torch.tensor([p_ids[p] for p in e["product_id"].values], dtype=torch.long)
-        data["user", t, "product"].edge_index = torch.stack([src,dst], dim=0)
+        src = torch.tensor([u_ids[int(u)] for u in e["user_id"].values], dtype=torch.long)
+        dst = torch.tensor([p_ids[int(p)] for p in e["product_id"].values], dtype=torch.long)
 
+        data["user", t, "product"].edge_index = torch.stack([src, dst], dim=0)
+        data["product", f"rev_{t}", "user"].edge_index = torch.stack([dst, src], dim=0)
 
+    # --- Product -> Category edges (and reverse)
     pc = prods.dropna(subset=["category_id"])
     if len(pc):
-        src = torch.tensor([p_ids[p] for p in pc["product_id"].values], dtype=torch.long)
-        dst = torch.tensor([c_ids[c] for c in pc["category_id"].values], dtype=torch.long)
-        data["product","belongs_to","category"].edge_index = torch.stack([src,dst], dim=0)
+        src = torch.tensor([p_ids[int(p)] for p in pc["product_id"].values], dtype=torch.long)
+        dst = torch.tensor([c_ids[int(c)] for c in pc["category_id"].values], dtype=torch.long)
+        data["product", "belongs_to", "category"].edge_index = torch.stack([src, dst], dim=0)
+        data["category", "rev_belongs_to", "product"].edge_index = torch.stack([dst, src], dim=0)
 
-
+    # --- Product -> Brand edges (and reverse)
     pb = prods
     if len(pb):
-        src = torch.tensor([p_ids[p] for p in pb["product_id"].values], dtype=torch.long)
-        dst = torch.tensor([b_ids[b] for b in pb["brand"].values], dtype=torch.long)
-        data["product","belongs_to","brand"].edge_index = torch.stack([src,dst], dim=0)
-
+        src = torch.tensor([p_ids[int(p)] for p in pb["product_id"].values], dtype=torch.long)
+        dst = torch.tensor([b_ids[str(b)] for b in pb["brand"].astype(str).values], dtype=torch.long)
+        data["product", "belongs_to", "brand"].edge_index = torch.stack([src, dst], dim=0)
+        data["brand", "rev_belongs_to", "product"].edge_index = torch.stack([dst, src], dim=0)
 
     meta = data.metadata()
     return data, meta, u_ids, p_ids
+
 
 
 def build_training_pairs(inter, u_ids, p_ids):
