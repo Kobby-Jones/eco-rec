@@ -16,9 +16,9 @@ CATEGORIES = [
 {"id":13,"name":"Electronics"},
 ]
 PRODUCTS = [
-{"id":101,"sku":"SKU101","title":"Blue Sneakers","price_cents":7999,"currency":"USD","brand":"RunX","category_id":11,"image_url":"https://picsum.photos/seed/101/400"},
-{"id":102,"sku":"SKU102","title":"Red Hoodie","price_cents":5599,"currency":"USD","brand":"ClothCo","category_id":12,"image_url":"https://picsum.photos/seed/102/400"},
-{"id":103,"sku":"SKU103","title":"Wireless Earbuds","price_cents":9999,"currency":"USD","brand":"Sonic","category_id":13,"image_url":"https://picsum.photos/seed/103/400"},
+{"id":101,"sku":"SKU101","title":"Iphone 13 Pro","price_cents":7999,"currency":"GH","brand":"RunX","category_id":11,"image_url":"https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/1.webp"},
+{"id":102,"sku":"SKU102","title":"Red Hoodie","price_cents":5599,"currency":"GH","brand":"ClothCo","category_id":12,"image_url":"https://picsum.photos/seed/102/400"},
+{"id":103,"sku":"SKU103","title":"Wireless Earbuds","price_cents":9999,"currency":"GH","brand":"Sonic","category_id":13,"image_url":"https://picsum.photos/seed/103/400"},
 ]
 INTERACTIONS = [
 {"user_id":1,"product_id":101,"type":"view"},

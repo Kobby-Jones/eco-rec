@@ -8,23 +8,43 @@ export default function ProductCard({ p, userId }: { p: Product; userId: number 
   const [src, setSrc] = useState(p.image_url || '/placeholder.png')
 
   return (
-    <div className="rounded-2xl shadow p-4 hover:shadow-lg transition">
-      <Link to={`/product/${p.id}`} onClick={() => track('click', p.id)}>
+    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition flex flex-col items-center p-4">
+      <Link
+        to={`/product/${p.id}`}
+        onClick={() => track('click', p.id, p.category_id)}
+        className="w-full flex justify-center"
+      >
         <img
           src={src}
           alt={p.title}
-          className="w-full h-40 object-cover rounded-xl mb-3 bg-gray-100"
+          className="w-full h-40 object-contain mb-3"
           onError={() => setSrc('/placeholder.png')}
           loading="lazy"
         />
       </Link>
-      <div className="text-sm text-gray-500">{p.brand}</div>
-      <div className="font-medium mb-2 line-clamp-2">{p.title}</div>
-      <div className="mb-3">{(p.price_cents/100).toFixed(2)} {p.currency}</div>
-      <div className="flex gap-2">
-        <Link className="text-blue-600 text-sm" to={`/product/${p.id}`}>View</Link>
-        <button className="text-sm" onClick={() => track('add_to_cart', p.id)}>Add to Cart</button>
+
+      {/* Title */}
+      <h3 className="text-sm font-medium text-gray-800 text-center mb-1">
+        {p.title}
+      </h3>
+
+      {/* Price */}
+      <p className="text-gray-900 font-semibold mb-1">
+        GH₵{(p.price_cents / 100).toLocaleString()}
+      </p>
+
+      {/* Stars */}
+      <div className="flex items-center text-yellow-500 text-sm mb-2">
+        {"★".repeat(5)}
       </div>
+
+      {/* Add to Cart */}
+      <button
+        className="w-full bg-blue-600 text-white text-sm font-medium py-2 rounded-md hover:bg-blue-700 transition"
+        onClick={() => track('add_to_cart', p.id)}
+      >
+        Add to Cart
+      </button>
     </div>
   )
 }
